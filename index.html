@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Sticky Notes - Chrome Extension</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "SF Pro", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", SimHei, Arial, Helvetica, sans-serif;
+            background: #ffffff;
+            color: #000000;
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #e9ecef;
+            z-index: 1000;
+            padding: 16px 0;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #000000;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 30px;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            align-items: center;
+        }
+
+        .nav-link {
+            text-decoration: none;
+            color: #495057;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: #4285f4;
+        }
+
+        .github-button {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            background: #24292e;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .github-button:hover {
+            background: #1a1e22;
+            transform: translateY(-1px);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 120px 24px 80px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+            text-align: center;
+        }
+
+        .hero-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hero-title {
+            font-size: 48px;
+            font-weight: 700;
+            color: #000000;
+            margin-bottom: 24px;
+            line-height: 1.2;
+        }
+
+        .hero-subtitle {
+            font-size: 20px;
+            color: #6c757d;
+            margin-bottom: 48px;
+            line-height: 1.5;
+        }
+
+        .hero-demo {
+            background: #ffffff;
+            border: 1px solid #e9ecef;
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            margin: 0 auto 48px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .demo-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .demo-logo {
+            width: 50px;
+            height: 38px;
+        }
+
+        .demo-notes-icon {
+            width: 38px;
+            height: 38px;
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .demo-input {
+            width: 100%;
+            padding: 16px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #6c757d;
+            background: #ffffff;
+            margin-bottom: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .demo-hint {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            color: #adb5bd;
+            font-weight: 500;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .primary-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: #4285f4;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            border: none;
+            cursor: pointer;
+        }
+
+        .primary-button:hover {
+            background: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(66, 133, 244, 0.3);
+        }
+
+        .secondary-button {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 32px;
+            background: #ffffff;
+            color: #495057;
+            text-decoration: none;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .secondary-button:hover {
+            border-color: #4285f4;
+            color: #4285f4;
+            transform: translateY(-2px);
+        }
+
+        /* Features Section */
+        .features {
+            padding: 80px 24px;
+            background: #ffffff;
+        }
+
+        .features-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            font-size: 36px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 16px;
+            color: #000000;
+        }
+
+        .section-subtitle {
+            font-size: 18px;
+            color: #6c757d;
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 48px;
+            margin-bottom: 64px;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 32px;
+            background: #f8f9fa;
+            border-radius: 16px;
+            transition: all 0.2s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-icon {
+            width: 64px;
+            height: 64px;
+            background: #4285f4;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 24px;
+        }
+
+        .feature-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: #000000;
+        }
+
+        .feature-description {
+            font-size: 16px;
+            color: #6c757d;
+            line-height: 1.6;
+        }
+
+        /* Extension Preview */
+        .extension-preview {
+            padding: 80px 24px;
+            background: #f8f9fa;
+        }
+
+        .preview-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 64px;
+            align-items: center;
+        }
+
+        .preview-text h3 {
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 24px;
+            color: #000000;
+        }
+
+        .preview-text p {
+            font-size: 18px;
+            color: #6c757d;
+            line-height: 1.6;
+            margin-bottom: 32px;
+        }
+
+        .preview-image {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e9ecef;
+        }
+
+        /* Footer */
+        .footer {
+            background: #24292e;
+            color: #ffffff;
+            padding: 48px 24px;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: #ffffff;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s ease;
+        }
+
+        .footer-link:hover {
+            color: #4285f4;
+        }
+
+        .footer-text {
+            color: #8b949e;
+            font-size: 14px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .hero-title {
+                font-size: 36px;
+            }
+
+            .hero-subtitle {
+                font-size: 18px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .primary-button,
+            .secondary-button {
+                width: 100%;
+                max-width: 300px;
+                justify-content: center;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .preview-content {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .section-title {
+                font-size: 28px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero {
+                padding: 100px 16px 60px;
+            }
+
+            .hero-demo {
+                padding: 24px;
+            }
+
+            .features,
+            .extension-preview {
+                padding: 60px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo">
+                <svg class="logo-icon" viewBox="0 0 70 53" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="0.5" y="0.5" width="69" height="52" stroke="black" stroke-width="1"/>
+                    <path d="M15 20C15 20 20 15 25 20C30 25 35 15 40 20C45 25 50 20 50 20" stroke="black" stroke-width="2" fill="none"/>
+                    <rect x="20" y="35" width="4" height="4" fill="black"/>
+                    <rect x="46" y="35" width="4" height="4" fill="black"/>
+                </svg>
+                <span class="logo-text">AI Sticky Notes</span>
+            </a>
+            
+            <nav class="nav-links">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#preview" class="nav-link">Preview</a>
+                <a href="https://github.com/your-username/ai-sticky-notes" class="github-button">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                    </svg>
+                    GitHub
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1 class="hero-title">Meet Your AI Note-Taking Assistant</h1>
+            <p class="hero-subtitle">Transform your thoughts into organized, actionable notes with AI-powered intelligence. Perfect for Chrome users who want to stay productive.</p>
+            
+            <div class="hero-demo">
+                <div class="demo-header">
+                    <svg class="demo-logo" viewBox="0 0 70 53" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0.5" y="0.5" width="69" height="52" stroke="black" stroke-width="1"/>
+                        <path d="M15 20C15 20 20 15 25 20C30 25 35 15 40 20C45 25 50 20 50 20" stroke="black" stroke-width="2" fill="none"/>
+                        <rect x="20" y="35" width="4" height="4" fill="black"/>
+                        <rect x="46" y="35" width="4" height="4" fill="black"/>
+                    </svg>
+                    
+                    <div class="demo-notes-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="2" y="2" width="20" height="20" rx="3" stroke="#666" stroke-width="1.5"/>
+                            <path d="M7 8L17 8" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M7 12L17 12" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M7 16L13 16" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <input type="text" class="demo-input" placeholder="Tell me anything on your mind..." readonly>
+                <div class="demo-hint">
+                    <svg width="16" height="14" viewBox="0 0 16 14" fill="none">
+                        <path d="M8 1L3 6L8 11" stroke="#6c757d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3 6H13" stroke="#6c757d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>Tap ENTER to save - AI will organize it for you</span>
+                </div>
+            </div>
+
+            <div class="cta-buttons">
+                <a href="https://github.com/your-username/ai-sticky-notes" class="primary-button">
+                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"/>
+                    </svg>
+                    Download from GitHub
+                </a>
+                <a href="#preview" class="secondary-button">
+                    See How It Works
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="features-content">
+            <h2 class="section-title">Smart Features for Smarter Notes</h2>
+            <p class="section-subtitle">AI-powered tools that help you capture, organize, and act on your thoughts</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M16 2L6 8L16 14L26 8L16 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6 16L16 22L26 16" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <path d="M6 24L16 30L26 24" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">AI Organization</h3>
+                    <p class="feature-description">Automatically categorizes and tags your notes using advanced AI. Your thoughts stay organized without any effort.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="16" cy="16" r="12" stroke="white" stroke-width="2"/>
+                            <path d="M16 8V16L20 20" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Smart Reminders</h3>
+                    <p class="feature-description">Never forget important tasks. AI analyzes your notes and suggests the perfect time to remind you.</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect x="6" y="6" width="20" height="20" rx="4" stroke="white" stroke-width="2"/>
+                            <path d="M10 14L14 18L22 10" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-title">Calendar Integration</h3>
+                    <p class="feature-description">Seamlessly sync with Google Calendar. Turn your notes into scheduled events with one click.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Extension Preview -->
+    <section class="extension-preview" id="preview">
+        <div class="preview-content">
+            <div class="preview-text">
+                <h3>See It In Action</h3>
+                <p>Watch how AI Sticky Notes transforms your browsing experience. Capture thoughts instantly, organize them intelligently, and never lose track of what matters.</p>
+                <div style="margin-top: 32px;">
+                    <a href="https://github.com/your-username/ai-sticky-notes" class="primary-button">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10 0C4.477 0 0 4.484 0 10.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0110 4.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.203 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.942.359.31.678.921.678 1.856 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0020 10.017C20 4.484 15.522 0 10 0z"/>
+                        </svg>
+                        Get the Extension
+                    </a>
+                </div>
+            </div>
+            
+            <div class="preview-image">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
+                    <svg width="50" height="38" viewBox="0 0 70 53" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="0.5" y="0.5" width="69" height="52" stroke="black" stroke-width="1"/>
+                        <path d="M15 20C15 20 20 15 25 20C30 25 35 15 40 20C45 25 50 20 50 20" stroke="black" stroke-width="2" fill="none"/>
+                        <rect x="20" y="35" width="4" height="4" fill="black"/>
+                        <rect x="46" y="35" width="4" height="4" fill="black"/>
+                    </svg>
+                    
+                    <div style="width: 38px; height: 38px; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                            <rect x="2" y="2" width="20" height="20" rx="3" stroke="#666" stroke-width="1.5"/>
+                            <path d="M7 8L17 8" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M7 12L17 12" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+                            <path d="M7 16L13 16" stroke="#666" stroke-width="1.5" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <input type="text" style="width: 100%; padding: 16px; border: 1px solid #dee2e6; border-radius: 8px; font-size: 16px; color: #6c757d; background: #ffffff; margin-bottom: 16px;" placeholder="Meeting with team at 3pm..." readonly>
+                
+                <div style="display: flex; align-items: center; gap: 8px; font-size: 14px; color: #6c757d; font-weight: 500;">
+                    <svg width="16" height="14" viewBox="0 0 16 14" fill="none">
+                        <path d="M8 1L3 6L8 11" stroke="#6c757d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M3 6H13" stroke="#6c757d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <span>AI categorized this as: Work • Meeting • Today</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="#" class="footer-link">Documentation</a>
+                <a href="#" class="footer-link">Support</a>
+                <a href="#" class="footer-link">Privacy</a>
+                <a href="https://github.com/your-username/ai-sticky-notes" class="footer-link">GitHub</a>
+            </div>
+            <p class="footer-text">© 2024 AI Sticky Notes. Made with ❤️ for productivity enthusiasts.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Typing animation for demo input
+        const demoInputs = document.querySelectorAll('.demo-input');
+        const messages = [
+            'Meeting with team at 3pm...',
+            'Buy groceries for dinner...',
+            'Call mom about weekend plans...',
+            'Finish project report...',
+            'Book flight for conference...',
+            'Review design mockups...',
+            'Schedule dentist appointment...'
+        ];
+
+        demoInputs.forEach(input => {
+            let messageIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
+
+            function typeMessage() {
+                const currentMessage = messages[messageIndex];
+                
+                if (isDeleting) {
+                    input.placeholder = currentMessage.substring(0, charIndex - 1);
+                    charIndex--;
+                } else {
+                    input.placeholder = currentMessage.substring(0, charIndex + 1);
+                    charIndex++;
+                }
+                
+                if (!isDeleting && charIndex === currentMessage.length) {
+                    isDeleting = true;
+                    setTimeout(typeMessage, 2000);
+                } else if (isDeleting && charIndex === 0) {
+                    isDeleting = false;
+                    messageIndex = (messageIndex + 1) % messages.length;
+                    setTimeout(typeMessage, 500);
+                } else {
+                    setTimeout(typeMessage, isDeleting ? 50 : 100);
+                }
+            }
+
+            setTimeout(typeMessage, 1000 + Math.random() * 1000);
+        });
+
+        // Add scroll effect to header
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(255, 255, 255, 0.98)';
+                header.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+            } else {
+                header.style.background = 'rgba(255, 255, 255, 0.95)';
+                header.style.boxShadow = 'none';
+            }
+        });
+
+        // Button click animations
+        document.querySelectorAll('.primary-button, .github-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                if (this.href.includes('github.com')) {
+                    e.preventDefault();
+                    // Simulate GitHub redirect
+                    this.style.transform = 'translateY(2px)';
+                    setTimeout(() => {
+                        this.style.transform = 'translateY(-2px)';
+                        console.log('Redirecting to GitHub...');
+                        // In real implementation: window.location.href = this.href;
+                    }, 150);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
